@@ -43,6 +43,7 @@
 
 #define T_ARR_SIZE 8
 #define D_ARR_SIZE 1000
+#define RECORD_SIZE 96
 #define key_t int32_t
 
 
@@ -64,6 +65,6 @@ struct t_radix
 struct d_record 
 {
     key_t key;
-    char* record;
+    char* record[RECORD_SIZE];
     struct d_record *next;
 };
