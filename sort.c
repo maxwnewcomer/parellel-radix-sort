@@ -20,9 +20,9 @@ int p_radix_sort(char* filename) {
     size_t pagesize = getpagesize();
     int filesize = get_file_size(filename);
     // get quick approximates
-    int MAX_THREADS = filesize / 800; // can auto adjust this based on file size 
+    int MAX_THREADS = filesize / 770; // can auto adjust this based on file size 
     if (MAX_THREADS > 10) MAX_THREADS = 10;
-    int ARR_SIZE = filesize / 100 / MAX_THREADS * 1.35;
+    int ARR_SIZE = filesize / 100 / MAX_THREADS * 1.4;
     // add struct definition (have to add here for dynamic arr size)
     typedef struct t_radix
     {

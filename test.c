@@ -2,6 +2,8 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
+#include "time.h"
+
 unsigned char *gen_rdm_bytestream (size_t num_bytes)
 {
     unsigned char *stream = malloc (num_bytes);
@@ -37,7 +39,16 @@ int main(int argc, char* argv[])
         n = atoi(argv[1]);
     }
     char filename[] = "records.dat";
+
     generate_test_file(n, filename);
+    // start timer
+    clock_t start = clock(), diff;
+    // sort
     p_radix_sort(filename);
+    // get perf into
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+    printf("Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
+    
     return 0;
 }
