@@ -47,8 +47,14 @@
 #define RECORD_SIZE 96
 #define key_t int32_t
 
-
 int p_radix_sort(char* filename);
+
+typedef struct thread_args
+{
+    int ARR_SIZE;
+    int my_tid;
+    void* thread_mem;
+} thread_args;
 
 typedef struct record
 {
