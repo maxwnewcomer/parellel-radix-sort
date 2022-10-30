@@ -17,15 +17,9 @@ int get_file_size(char* filename) {
     return size;
 }
 int counting_sort(record* start, int size, record** lower) {
-    printf("%p\n", start);
     for(int i = 0; i < size; i++) {
-        // printf("%i\n", i);
-        // printf("%x", lower[i]);s
-        // printf("%x", &(start[i]));
-        // lower[i] =  &(start[i]);
-        // memcpy(lower[i], (&(start[i])), sizeof(record*));
+        lower[i] = &start[i];
     }
-        // printf("%i", lower[i]->key);
     return 0;
 }
 
@@ -39,20 +33,23 @@ void* t_run(void* in_ta) {
         int first_1;
         int my_tid;
         record* arr_start;
-        record** lower[ta->ARR_SIZE];
     } t_radix;
-
+    record** lower = malloc(ta->ARR_SIZE * sizeof(record*));
+    if(!lower) {
+        printf("failed to allocate lower arr");
+        exit(EXIT_FAILURE);
+    }
     t_radix* thread_mem = (t_radix *) ta->thread_mem;
-    // 
     t_radix* me = &thread_mem[ta->my_tid];
-    printf("%2i: [%p]\n", ta->my_tid, thread_mem[ta->my_tid].arr_start);
+    // end of bullshit
+
     // sort 
-    counting_sort(me->arr_start, ta->ARR_SIZE, *thread_mem[ta->my_tid].lower);
-    // print
-    // printf("%i: [", ta->my_tid);
-    // for(int i = 0; i < ta->ARR_SIZE; i++) {
-    //     printf("%x,", thread_mem[]);
-    // }
+    counting_sort(me->arr_start, ta->ARR_SIZE, lower);
+    // printf("%i: [\n", ta->my_tid);
+    for(int i = 0; i < ta->ARR_SIZE; i++) {
+        printf("%i\t%p\t%x\n", ta->my_tid, &lower[i]->key, lower[i]->key);
+    }
+    // printf("]\n");
     return 0;
 }
 
@@ -60,24 +57,23 @@ int p_radix_sort(char* filename) {
     size_t pagesize = getpagesize();
     int filesize = get_file_size(filename);
     // get quick approximates
-    int MAX_THREADS = filesize / 770; // can auto adjust this based on file size 
-    if (MAX_THREADS > 25) MAX_THREADS = 25; // change back to 10
-    int ARR_SIZE = filesize / 100 / MAX_THREADS * 1.4;
-    ARR_SIZE = 10; // DELETE ME
-    MAX_THREADS = 1;
+    int THREADS = filesize / 1000; // can auto adjust this based on file size 
+    if (THREADS > MAX_THREADS) THREADS = MAX_THREADS; // change back to 10
+    int ARR_SIZE = filesize / 100 / THREADS;
+    // ARR_SIZE = 10; // DELETE ME
+    // THREADS = 1;
     // add struct definition (have to add here for dynamic arr size)
     typedef struct t_radix
     {
-        int filled;
+         int filled;
         int finished_0;
         int first_1;
         int my_tid;
-        record* arr_start;
-        record** lower[ARR_SIZE];
+        record* arr_start;        
     } t_radix;
 
-    t_radix *thread_mem = malloc(MAX_THREADS*sizeof(t_radix));
-    memset(thread_mem, 0, MAX_THREADS*sizeof(t_radix));
+    t_radix *thread_mem = malloc(THREADS*sizeof(t_radix));
+    memset(thread_mem, 0, THREADS*sizeof(t_radix));
     // memory map records
     struct stat sb;
     int f;
@@ -89,23 +85,22 @@ int p_radix_sort(char* filename) {
         printf("Failed to map memory :/\n");
         exit(EXIT_FAILURE);
     }
-
     // init structs
-    for(int i = 0; i < MAX_THREADS; i++) {
+    for(int i = 0; i < THREADS; i++) {
         thread_mem[i].filled = 0;
         thread_mem[i].finished_0 = 0;
         thread_mem[i].my_tid = i;
         thread_mem[i].arr_start = &(mapped_records[i * ARR_SIZE]);
-        memset(thread_mem[i].lower, 0, ARR_SIZE); // maybe unnecessary ?? 
+        // memset(thread_mem[i].lower, 0, ARR_SIZE); // maybe unnecessary ?? 
     }
-    printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tthreadsize: %li\n", filesize, MAX_THREADS, ARR_SIZE, sizeof(t_radix));
+    printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
 
 
     
     // alloc threads
-    pthread_t *threads = malloc(sizeof(pthread_t)*MAX_THREADS);
+    pthread_t *threads = malloc(sizeof(pthread_t)*THREADS);
     // create threads
-    for (int i = 0; i < MAX_THREADS; i++) {
+    for (int i = 0; i < THREADS; i++) {
         // run t_run mehtod
         thread_args* ta = malloc(8 + 8 + sizeof(&thread_mem));
         ta->ARR_SIZE = ARR_SIZE;
@@ -117,7 +112,7 @@ int p_radix_sort(char* filename) {
             exit(1);
         }
     }
-    for(int i = 0; i < MAX_THREADS; i++) {
+    for(int i = 0; i < THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
     free(thread_mem);

@@ -46,6 +46,7 @@
 #define D_ARR_SIZE 1000
 #define RECORD_SIZE 96
 #define key_t int32_t
+#define MAX_THREADS 16
 
 int p_radix_sort(char* filename);
 
@@ -59,5 +60,5 @@ typedef struct thread_args
 typedef struct record
 {
     key_t key;
-    uint8_t* record[RECORD_SIZE];
+    char record[RECORD_SIZE];
 } record;

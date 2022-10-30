@@ -4,16 +4,22 @@
 #include "string.h"
 #include "time.h"
 
-unsigned char *gen_rdm_bytestream (size_t num_bytes)
+
+int getrand(int min,int max){
+    return(rand()%(max-min)+min);
+}
+
+char *gen_rdm_bytestream (size_t num_bytes)
 {
-    unsigned char *stream = malloc (num_bytes);
+    char *stream = malloc (num_bytes);
     size_t i;
     for (i = 0; i < num_bytes; i++)
     {
-        stream[i] = rand();
+        stream[i] = getrand(0, 255);
     }
     return stream;
 }
+
 
 int generate_test_file(int n, char* filename) 
 {
@@ -23,6 +29,9 @@ int generate_test_file(int n, char* filename)
         exit(EXIT_FAILURE);
     for(int i = 0; i < n; i++) {
         char* record = (char*)gen_rdm_bytestream(100);
+        while(strlen(record)!=100) {
+            record = (char*)gen_rdm_bytestream(100);
+        }
         fputs(record, f);
         free(record);
     }
@@ -32,6 +41,8 @@ int generate_test_file(int n, char* filename)
 
 int main(int argc, char* argv[]) 
 {
+    srand(time(NULL));
+
     int n;
     if(argc < 2) {
         n = 10;
@@ -45,6 +56,8 @@ int main(int argc, char* argv[])
     // start timer
     clock_t start = clock(), diff;
     // sort
+    
+
     p_radix_sort(filename);
     // get perf into
     diff = clock() - start;
