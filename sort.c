@@ -8,6 +8,7 @@
 #include "string.h"
 #include "unistd.h"
 #include "pthread.h"
+#include "thread.h"
 
 
 int get_file_size(char* filename) {
@@ -15,42 +16,6 @@ int get_file_size(char* filename) {
     stat(filename, &st);
     off_t size = st.st_size;
     return size;
-}
-int counting_sort(record* start, int size, record** lower) {
-    for(int i = 0; i < size; i++) {
-        lower[i] = &start[i];
-    }
-    return 0;
-}
-
-void* t_run(void* in_ta) {
-    // bullshit C setup
-    thread_args* ta = (thread_args*) in_ta;
-    typedef struct t_radix
-    {
-        int filled;
-        int finished_0;
-        int first_1;
-        int my_tid;
-        record* arr_start;
-    } t_radix;
-    record** lower = malloc(ta->ARR_SIZE * sizeof(record*));
-    if(!lower) {
-        printf("failed to allocate lower arr");
-        exit(EXIT_FAILURE);
-    }
-    t_radix* thread_mem = (t_radix *) ta->thread_mem;
-    t_radix* me = &thread_mem[ta->my_tid];
-    // end of bullshit
-
-    // sort 
-    counting_sort(me->arr_start, ta->ARR_SIZE, lower);
-    // printf("%i: [\n", ta->my_tid);
-    for(int i = 0; i < ta->ARR_SIZE; i++) {
-        printf("%i\t%p\t%x\n", ta->my_tid, &lower[i]->key, lower[i]->key);
-    }
-    // printf("]\n");
-    return 0;
 }
 
 int p_radix_sort(char* filename) {
@@ -60,8 +25,6 @@ int p_radix_sort(char* filename) {
     int THREADS = filesize / 1000; // can auto adjust this based on file size 
     if (THREADS > MAX_THREADS) THREADS = MAX_THREADS; // change back to 10
     int ARR_SIZE = filesize / 100 / THREADS;
-    // ARR_SIZE = 10; // DELETE ME
-    // THREADS = 1;
     // add struct definition (have to add here for dynamic arr size)
     typedef struct t_radix
     {
