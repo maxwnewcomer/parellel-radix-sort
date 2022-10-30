@@ -1,24 +1,43 @@
 #include "sort.h"
 #include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+unsigned char *gen_rdm_bytestream (size_t num_bytes)
+{
+    unsigned char *stream = malloc (num_bytes);
+    size_t i;
+    for (i = 0; i < num_bytes; i++)
+    {
+        stream[i] = rand();
+    }
+    return stream;
+}
 
-int test_sort(int n) {
-    int** arr = malloc(n*sizeof(int*));
-    int j = 0;
-    for(int i = n; i >= 0; i--) {
-        arr[j] = malloc(sizeof(int*));
-        *arr[j] = i;
-        j++;
-    }
-    sort(arr);
+int generate_test_file(int n, char* filename) 
+{
+    FILE * f;
+    f = fopen(filename, "w");
+    if(f == NULL)
+        exit(EXIT_FAILURE);
     for(int i = 0; i < n; i++) {
-        free(arr[i]);
+        char* record = (char*)gen_rdm_bytestream(100);
+        fputs(record, f);
+        free(record);
     }
-    free(arr);
+    fclose(f);
     return 0;
 }
 
-int main(int argc, char* argv[]) {
-    int n = atoi(argv[1]);
-    test_sort(n);
+int main(int argc, char* argv[]) 
+{
+    int n;
+    if(argc < 2) {
+        n = 100;
+    } else {
+        n = atoi(argv[1]);
+    }
+    char filename[] = "records.dat";
+    generate_test_file(n, filename);
+    p_radix_sort(filename);
     return 0;
 }

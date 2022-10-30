@@ -34,37 +34,24 @@
 //          wait until finished_0 and filled
 //      once complete write key|dict[key] into new file going from p_radix[0]->p_radix[k]
 
-// Globals
-//      n - num records
-//      arr_size - num keys per process
-//      b - bit offset of key
+// High arr of struct is memory mapped to actual data, low struct is for extra work
+
+// update new structure, t_radix directly connected to mmaped records arr
+// lower is where thread does its own sorting, all threads fill into mmaped records arr
+// might have to call msync() between rounds ??
+
 
 #include "stdint.h"
 
-#define T_ARR_SIZE 8
 #define D_ARR_SIZE 1000
 #define RECORD_SIZE 96
 #define key_t int32_t
 
 
-int sort(int** arr);
+int p_radix_sort(char* filename);
 
-// radix sorter thread
-struct t_radix
-{
-    key_t *high[T_ARR_SIZE];
-    key_t *low[T_ARR_SIZE];
-    int h_l;
-    int filled;
-    int finished_0;
-    int my_idx;
-};
-
-
-// record in dictionary (linked list)
-struct d_record 
+typedef struct record
 {
     key_t key;
-    char* record[RECORD_SIZE];
-    struct d_record *next;
-};
+    uint8_t* record[RECORD_SIZE];
+} record;
