@@ -34,7 +34,7 @@ int generate_test_file(int n, char* filename)
         }
         fputs(record, f);
         free(record);
-        printf("%i\n", i);
+        // printf("%i\n", i);
     }
     fclose(f);
     return 0;

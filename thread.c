@@ -1,6 +1,7 @@
 #include "sort.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "thread.h"
 
 // ABC implementation from 
 // https://brilliant.org/wiki/radix-sort/

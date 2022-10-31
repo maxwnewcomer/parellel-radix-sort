@@ -50,14 +50,6 @@
 #define NUM_POS_VALUES (1 << BITS_AT_ONCE)
 #define key_t int32_t
 
-typedef struct thread_args
-{
-    int ARR_SIZE;
-    int my_tid;
-    int threads;
-    void* thread_mem;
-} thread_args;
-
 
 typedef struct record
 {
@@ -65,13 +57,5 @@ typedef struct record
     char record[RECORD_SIZE];
 } record;
 
-typedef struct t_radix
-{
-    int filled;
-    int count_n[NUM_POS_VALUES];
-    int last_idx;
-    int my_tid;
-    record* arr_start;
-} t_radix;
 
 int p_radix_sort(char* filename);
