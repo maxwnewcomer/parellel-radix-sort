@@ -48,19 +48,22 @@ int p_radix_sort(char* filename) {
         thread_mem[i].filled = 0;
         thread_mem[i].my_tid = i;
         thread_mem[i].arr_start = &(mapped_records[i * ARR_SIZE]);
-        thread_mem[i].last_idx = 0;
     }
     printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
 
     // alloc threads
     pthread_t *threads = malloc(sizeof(pthread_t)*THREADS);
+    int* add_idx_ptr = malloc(sizeof(int));
+    int* add_thread_ptr = malloc(sizeof(int));
     // create threads
     for (int i = 0; i < THREADS; i++) {
         // run t_run mehtod
-        thread_args* ta = malloc(8 + 8 + 8 + 8 + sizeof(&thread_mem));
+        thread_args* ta = malloc(8 + 8 + 8 + 8 + sizeof(int*) + sizeof(int*)+ sizeof(&thread_mem));
         ta->ARR_SIZE = ARR_SIZE;
         ta->filesize = filesize;
         ta->my_tid = i;
+        ta->add_idx = add_idx_ptr;
+        ta->add_thread = add_thread_ptr;
         ta->threads = THREADS;
         ta->thread_mem = thread_mem;
         int r = pthread_create(&threads[i], NULL, &t_run, ta);
@@ -71,6 +74,9 @@ int p_radix_sort(char* filename) {
     }
     for(int i = 0; i < THREADS; i++) {
         pthread_join(threads[i], NULL);
+    }
+    for(int i = 0; i < filesize / sizeof(record); i++) {
+        printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
     }
     msync(mapped_records, filesize, 0);
     munmap(mapped_records, filesize);
