@@ -34,6 +34,7 @@ int generate_test_file(int n, char* filename)
         }
         fputs(record, f);
         free(record);
+        printf("%i\n", i);
     }
     fclose(f);
     return 0;
@@ -42,17 +43,16 @@ int generate_test_file(int n, char* filename)
 int main(int argc, char* argv[]) 
 {
     srand(time(NULL));
-
+    char filename[] = "records.dat";
     int n;
     if(argc < 2) {
         n = 10;
     } else {
         n = atoi(argv[1]);
+        printf("Writing %i records...\n", n);
+        generate_test_file(n, filename);
     }
-    printf("Writing %i records...\n", n);
-    char filename[] = "records.dat";
-
-    generate_test_file(n, filename);
+   
     // start timer
     clock_t start = clock(), diff;
     // sort

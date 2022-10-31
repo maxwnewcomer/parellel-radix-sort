@@ -45,22 +45,33 @@
 
 #define D_ARR_SIZE 1000
 #define RECORD_SIZE 96
-#define MAX_THREADS 16
-#define BITS_AT_ONCE 4
+#define MAX_THREADS 100
+#define BITS_AT_ONCE 1
 #define NUM_POS_VALUES (1 << BITS_AT_ONCE)
 #define key_t int32_t
-
-int p_radix_sort(char* filename);
 
 typedef struct thread_args
 {
     int ARR_SIZE;
     int my_tid;
+    int threads;
     void* thread_mem;
 } thread_args;
+
 
 typedef struct record
 {
     key_t key;
     char record[RECORD_SIZE];
 } record;
+
+typedef struct t_radix
+{
+    int filled;
+    int count_n[NUM_POS_VALUES];
+    int last_idx;
+    int my_tid;
+    record* arr_start;
+} t_radix;
+
+int p_radix_sort(char* filename);
