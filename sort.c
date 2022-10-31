@@ -9,6 +9,7 @@
 #include "unistd.h"
 #include "pthread.h"
 #include "thread.h"
+#include "math.h"
 
 
 int get_file_size(char* filename) {
@@ -23,8 +24,11 @@ int p_radix_sort(char* filename) {
     int filesize = get_file_size(filename);
     // get quick approximates
     int THREADS = filesize / 1000; // can auto adjust this based on file size 
+    if (THREADS < 1) THREADS = 1;
     if (THREADS > MAX_THREADS) THREADS = MAX_THREADS; // change back to 10
-    int ARR_SIZE = filesize / 100 / THREADS;
+    float div_result = filesize / 100.0 / (float)THREADS;
+    int ARR_SIZE = (int)div_result;
+    if (ARR_SIZE - div_result < 0) ARR_SIZE += 1;
 
     t_radix *thread_mem = malloc(THREADS*sizeof(t_radix));
     memset(thread_mem, 0, THREADS*sizeof(t_radix));
@@ -67,8 +71,8 @@ int p_radix_sort(char* filename) {
     for(int i = 0; i < THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
+    munmap(mapped_records, filesize);
     free(thread_mem);
     free(threads);
-    munmap(mapped_records, filesize);
     return 1;
 }

@@ -56,8 +56,6 @@ int main(int argc, char* argv[])
     // start timer
     clock_t start = clock(), diff;
     // sort
-    
-
     p_radix_sort(filename);
     // get perf into
     diff = clock() - start;
