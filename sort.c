@@ -28,8 +28,8 @@ int p_radix_sort(char* filename) {
     // add struct definition (have to add here for dynamic arr size)
     typedef struct t_radix
     {
-         int filled;
-        int finished_0;
+        int filled;
+        int count_n[NUM_POS_VALUES];
         int first_1;
         int my_tid;
         record* arr_start;        
@@ -46,12 +46,11 @@ int p_radix_sort(char* filename) {
     record* mapped_records = (record*) mmap((void*) (pagesize * (1<<20)), filesize, PROT_READ || PROT_WRITE, MAP_SHARED, f, 0);
     if(mapped_records == MAP_FAILED) {
         printf("Failed to map memory :/\n");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     // init structs
     for(int i = 0; i < THREADS; i++) {
         thread_mem[i].filled = 0;
-        thread_mem[i].finished_0 = 0;
         thread_mem[i].my_tid = i;
         thread_mem[i].arr_start = &(mapped_records[i * ARR_SIZE]);
         // memset(thread_mem[i].lower, 0, ARR_SIZE); // maybe unnecessary ?? 
@@ -71,7 +70,7 @@ int p_radix_sort(char* filename) {
         ta->thread_mem = thread_mem;
         int r = pthread_create(&threads[i], NULL, &t_run, ta);
         if(r != 0) {
-            printf("Issue creating thread %i\n", i);
+            printf("Issue creating thread [%i]\n", i);
             exit(1);
         }
     }

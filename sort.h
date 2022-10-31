@@ -45,8 +45,10 @@
 
 #define D_ARR_SIZE 1000
 #define RECORD_SIZE 96
-#define key_t int32_t
 #define MAX_THREADS 16
+#define BITS_AT_ONCE 4
+#define NUM_POS_VALUES (1 << BITS_AT_ONCE)
+#define key_t int32_t
 
 int p_radix_sort(char* filename);
 
