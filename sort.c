@@ -35,10 +35,10 @@ int p_radix_sort(char* filename) {
     // memory map records
     struct stat sb;
     int f;
-    f = open(filename, O_RDONLY);
+    f = open(filename, O_RDWR);
     fstat(f, &sb);
 
-    record* mapped_records = (record*) mmap((void*) (pagesize * (1<<20)), filesize, PROT_READ || PROT_WRITE, MAP_SHARED, f, 0);
+    record* mapped_records = (record*) mmap((void*) (pagesize * (1<<20)), filesize, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
     if(mapped_records == MAP_FAILED) {
         printf("Failed to map memory :/\n");
         exit(1);
@@ -57,8 +57,9 @@ int p_radix_sort(char* filename) {
     // create threads
     for (int i = 0; i < THREADS; i++) {
         // run t_run mehtod
-        thread_args* ta = malloc(8 + 8 + 8 + sizeof(&thread_mem));
+        thread_args* ta = malloc(8 + 8 + 8 + 8 + sizeof(&thread_mem));
         ta->ARR_SIZE = ARR_SIZE;
+        ta->filesize = filesize;
         ta->my_tid = i;
         ta->threads = THREADS;
         ta->thread_mem = thread_mem;
@@ -71,6 +72,7 @@ int p_radix_sort(char* filename) {
     for(int i = 0; i < THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
+    msync(mapped_records, filesize, 0);
     munmap(mapped_records, filesize);
     free(thread_mem);
     free(threads);

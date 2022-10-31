@@ -10,6 +10,7 @@ typedef struct t_radix
 typedef struct thread_args
 {
     int ARR_SIZE;
+    int filesize;
     int my_tid;
     int threads;
     void* thread_mem;
