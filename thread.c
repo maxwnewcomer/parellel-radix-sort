@@ -3,22 +3,34 @@
 #include "stdlib.h"
 #include "thread.h"
 
-// ABC implementation from 
+// ABC implementation from
 // https://brilliant.org/wiki/radix-sort/
+// 
+// All shifting and masking original, array layouts from brilliant
+// count_n = C 
+// lower = B (kind of, B doesn't hold the values, only pointers to the values)
+// start = A
 // sort BITS_AT_ONCE bits at a time
 // NUM_POS_VALUES = 2^BITS_AT_ONCE
+// 
+// 
+// assume iteration = 1, BITS AT_ONCE = 4
+// start[k].key                                    = 0x1A93CFD2
+// mask << (iteration*BITS_AT_ONCE)                = 0x000000F0
+// start[k].key & mask                             = 0x000000D0
+// start[k].key & mask >> (iteration*BITS_AT_ONCE) = 0x0000000D
+//                                         indexable   ^^^^^^^^
+// 
 // sorts keys in memory into lower
 int counting_sort(record* start, int size, record** lower, int count_n[], int iteration) {
     key_t mask = (NUM_POS_VALUES-1);
     int C[NUM_POS_VALUES];
     mask = mask << (iteration*BITS_AT_ONCE);
-
     // count occurences of mask
     for(int i = 0; i<size; i++) {
         // eg. C[0xF & key] += 1
         count_n[(start[i].key & mask) >> (iteration*BITS_AT_ONCE)] += 1;
     }
-
     // C conversion for in-thread sort
     C[0] = count_n[0];
     for(int j = 1; j<NUM_POS_VALUES; j++) {
@@ -63,7 +75,7 @@ void* t_run(void* in_ta) {
     // move_to_mem(thread_mem, lower, ta->my_tid, ta->threads);
 
     for(int i = 0; i < ta->ARR_SIZE; i++) {
-        printf("%i\t%p\t%x\n", ta->my_tid, &lower[i]->key, lower[i]->key);
+        printf("%i\t%p\t%8x\n", ta->my_tid, &lower[i]->key, lower[i]->key);
     }
     return 0;
 }
