@@ -76,6 +76,14 @@ int p_radix_sort(char* filename) {
         printf("failed to alloc memory_lock");
         exit(EXIT_FAILURE);
     }
+    s_memory->lock = malloc(sizeof(pthread_mutex_t));
+    if(!s_memory->lock) {
+        printf("failed to allocated lock");
+        exit(EXIT_FAILURE);
+    }
+    pthread_mutex_init(s_memory->lock, NULL);
+    s_memory->c_t_arr = 0;
+    s_memory->c_t_idx = 0;
     // alloc globals
     globals* global = malloc(sizeof(globals));
     if(!global) {
@@ -84,6 +92,7 @@ int p_radix_sort(char* filename) {
     }
     global->ARR_SIZE = ARR_SIZE;
     global->THREADS = THREADS;
+    global->total_records = filesize / 100;
     // alloc threads
     pthread_t *threads = malloc(sizeof(pthread_t)*THREADS);
     // create threads

@@ -27,6 +27,7 @@ typedef struct globals
 {
     int ARR_SIZE;
     int THREADS;
+    int total_records;
 } globals;
 
 typedef struct thread_args

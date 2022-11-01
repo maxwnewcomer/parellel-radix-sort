@@ -56,12 +56,93 @@ int counting_sort(record* start, int size, record* lower, int* count_n, shared_c
     }
     return 0;
 }
-int move_to_mem(t_radix* thread_mem, record* lower, thread_args* ta) {
-    // t_radix* me = &thread_mem[ta->my_tid];
-    // shared_memory* s_mem = ta->s_memory;
-    // shared_count* s_count = ta->s_count;
-    // while(s_count[NUM_POS_VALUES-1] != )
 
+int move_to_mem(t_radix* thread_mem, record* lower, thread_args* ta) {
+    t_radix* me = &thread_mem[ta->my_tid];
+    shared_memory* s_mem = ta->s_memory;
+    shared_count* s_count = ta->s_count;
+    globals* global = ta->global;
+    int tid = ta->my_tid;
+    int count_idx = 0;
+    int lower_idx = 0;
+
+
+    // DEBUG
+    printf("\n[%i]\n", tid);
+    for(int i = 0; i < NUM_POS_VALUES; i++) {
+        printf("%2i ", me->count_n[i]);
+    }
+    printf("\n");
+    //
+
+    // process before curr (circular)
+    t_radix* before_me;
+    if(tid == 0) {
+        before_me = &thread_mem[global->THREADS - 1];
+    } else {
+        before_me = &thread_mem[tid];
+    }
+    while(count_idx < NUM_POS_VALUES) {
+        // tid 1 essentially starts the cascade for each bit pos fill in
+        // wait for "previous" thread to be sorted
+        if(ta->my_tid == 0) {
+            // unless first time through :)
+
+            // check: first count is 0 edge case
+            if(count_idx == 0) {
+                ;;
+            } else {
+                // wait for last round to end 
+                while(s_count->remaining[count_idx - 1] != 0) {}
+            }
+            if(me->count_n[count_idx] == 0) {
+                me->filled = count_idx;
+                count_idx += 1;
+                continue;
+            }
+        } else {
+            // get to needed count_idx
+            while(me->count_n[count_idx] == 0) {
+                count_idx += 1;
+            }
+            // wait for process before
+            while(before_me->filled != count_idx) {};
+        }
+        // get lock
+        pthread_mutex_lock(s_mem->lock);
+        printf("[%i] has the lock!\n", tid);
+        // insert here!
+        int inserting = me->count_n[count_idx];
+        while(me->count_n[count_idx] != 0) {
+            // printf("%i, %i, %i\n", tid, s_mem->c_t_arr, s_mem->c_t_idx);
+            // for(int i = 0; i < NUM_POS_VALUES; i++) {
+            //     printf("%2i ", me->count_n[i]);
+            // }
+            // printf("\n");
+            thread_mem[s_mem->c_t_arr].arr_start[s_mem->c_t_idx] = lower[lower_idx];
+            for(int i = count_idx; i < NUM_POS_VALUES; i++) {
+                me->count_n[i] -= 1;
+            }
+            
+            lower_idx += 1;
+            // calc new idx
+            if(s_mem->c_t_idx == global->ARR_SIZE - 1) {
+                s_mem->c_t_idx = 0;
+                s_mem->c_t_arr += 1;
+            } else {
+                s_mem->c_t_idx += 1;
+            }
+        }
+
+        for(int i = count_idx; i < NUM_POS_VALUES; i++) {
+            atomic_fetch_sub(&s_count->remaining[i], inserting);
+        }
+        count_idx += 1;
+        printf("[%i] unlocked the lock!\n", tid);
+        pthread_mutex_unlock(s_mem->lock);
+        me->filled = count_idx;
+    }
+        
 
     return 0;
 }
@@ -89,19 +170,9 @@ void* t_run(void* in_ta) {
        
         me->sorted = 0;
         counting_sort(me->arr_start, global->ARR_SIZE, lower, me->count_n, s_count, r);
-        // me->sorted = 1;
-        // for(int i = 0; i < global->ARR_SIZE; i++) {
-        //     printf("%08x\n", lower[i].key);
-        // }
-        // for(int i = 0; i < NUM_POS_VALUES; i++) {
-        //     printf("%3i ", me->count_n[i]);
-        // }
-        // printf("\n");
-        // for(int i = 0; i < NUM_POS_VALUES; i++) {
-        //     printf("%3i ", s_count->remaining[i]);
-        // }
-        // printf("\n");
-        // move_to_mem(thread_mem, lower, ta);        
+
+        me->sorted = 1;
+        move_to_mem(thread_mem, lower, ta);        
     }
     free(lower);
     return 0;
