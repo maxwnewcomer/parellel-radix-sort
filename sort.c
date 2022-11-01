@@ -10,6 +10,7 @@
 #include "pthread.h"
 #include "thread.h"
 #include "math.h"
+#include "stdatomic.h"
 
 
 int get_file_size(char* filename) {
@@ -48,38 +49,71 @@ int p_radix_sort(char* filename) {
         thread_mem[i].filled = 0;
         thread_mem[i].my_tid = i;
         thread_mem[i].arr_start = &(mapped_records[i * ARR_SIZE]);
+        
+        pthread_cond_init(&thread_mem[i].finished, NULL);
+        
     }
     printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
 
+    // alloc shared_count
+    shared_count* s_count = malloc(sizeof(s_count));
+    if(!s_count) {
+        printf("failed to alloc big_count");
+        exit(EXIT_FAILURE);
+    }
+
+    s_count->remaining = (atomic_int *) malloc(NUM_POS_VALUES * sizeof(atomic_int));
+    for(int i = 0; i <  NUM_POS_VALUES; i++) {
+        atomic_init(&s_count->remaining[i], 0);
+    }
+    // alloc shared_memory
+    shared_memory* s_memory = malloc(sizeof(shared_memory));
+    if(!s_memory) {
+        printf("failed to alloc memory_lock");
+        exit(EXIT_FAILURE);
+    }
+    // alloc globals
+    globals* global = malloc(sizeof(globals));
+    if(!global) {
+        printf("failed to alloc globals");
+        exit(EXIT_FAILURE);
+    }
+    global->ARR_SIZE = ARR_SIZE;
+    global->THREADS = THREADS;
     // alloc threads
     pthread_t *threads = malloc(sizeof(pthread_t)*THREADS);
-    int* add_idx_ptr = malloc(sizeof(int));
-    int* add_thread_ptr = malloc(sizeof(int));
     // create threads
     for (int i = 0; i < THREADS; i++) {
         // run t_run mehtod
-        thread_args* ta = malloc(8 + 8 + 8 + 8 + sizeof(int*) + sizeof(int*)+ sizeof(&thread_mem));
-        ta->ARR_SIZE = ARR_SIZE;
-        ta->filesize = filesize;
-        ta->my_tid = i;
-        ta->add_idx = add_idx_ptr;
-        ta->add_thread = add_thread_ptr;
-        ta->threads = THREADS;
+        thread_args* ta = malloc(sizeof(thread_args));
+        if(!ta) {
+            printf("failed to allocate ta");
+            exit(EXIT_FAILURE);
+        }
         ta->thread_mem = thread_mem;
+        ta->s_count = s_count;
+        ta->s_memory = s_memory;
+        ta->global = global;
+        ta->my_tid = i;
         int r = pthread_create(&threads[i], NULL, &t_run, ta);
         if(r != 0) {
             printf("Issue creating thread [%i]\n", i);
             exit(1);
         }
     }
+
     for(int i = 0; i < THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
+
     for(int i = 0; i < filesize / sizeof(record); i++) {
         printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
     }
     msync(mapped_records, filesize, 0);
     munmap(mapped_records, filesize);
+    free(s_count);
+    free(s_memory);
+    free(global);
     free(thread_mem);
     free(threads);
     return 1;
