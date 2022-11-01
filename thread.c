@@ -32,20 +32,19 @@ int counting_sort(record* start, int size, record* lower, int* count_n, shared_c
     key_t mask = (NUM_POS_VALUES-1);
     int C[NUM_POS_VALUES];
     mask = mask << (iteration*BITS_AT_ONCE);
-    // printf("yo\n");
-
     // count occurences of mask
     for(int i = 0; i<size; i++) {
         // eg. C[0xF & key] += 1
         count_n[(unsigned)(start[i].key & mask) >> (iteration*BITS_AT_ONCE)] += 1;
         // IMPORTANT TO USE UNSIGNED
     }
+
     // get sum-up_to[j]
+    C[0] = count_n[0];
     for(int j = 1; j<NUM_POS_VALUES; j++) {
         count_n[j] = count_n[j] + count_n[j-1];
         C[j] = count_n[j];
     }
-
     // final sort
     for(int k = size-1; k>=0; k--) {
         C[(unsigned)(start[k].key & mask) >> (iteration*BITS_AT_ONCE)] -= 1;

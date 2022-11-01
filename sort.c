@@ -63,6 +63,10 @@ int p_radix_sort(char* filename) {
     }
 
     s_count->remaining = (atomic_int *) malloc(NUM_POS_VALUES * sizeof(atomic_int));
+    if(!s_count->remaining) {
+        printf("failed to alloc remaining count");
+        exit(EXIT_FAILURE);
+    }
     for(int i = 0; i <  NUM_POS_VALUES; i++) {
         atomic_init(&s_count->remaining[i], 0);
     }
