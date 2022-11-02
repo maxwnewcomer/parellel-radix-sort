@@ -13,6 +13,7 @@ typedef struct t_radix
 typedef struct shared_memory
 {
     pthread_mutex_t* lock;
+    pthread_cond_t* checkable;
     int t_turn;  // thread turn
     int c_t_arr; // current thread arr
     int c_t_idx; // current thread arr index

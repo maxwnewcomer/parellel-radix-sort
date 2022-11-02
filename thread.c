@@ -91,14 +91,29 @@ int move_to_mem(t_radix* thread_mem, record* lower, thread_args* ta) {
     //
 
     while(count_idx < NUM_POS_VALUES) {
-        // wait for turn
+        // if thread 0 on first iter, try to get lock and run
+        // if(tid == 0 && count_idx == 0) {
+        //     while(1) {
+        //         pthread_mutex_lock(s_mem->lock);
+        //         if(s_mem->t_turn % global->THREADS == tid) {
+        //             break;
+        //         }
+        //         pthread_mutex_unlock(s_mem->lock);
+        //     }
+        // } else {
+            // wait for turn
         while(1) {
-            pthread_mutex_lock(s_mem->lock);
+            // try to lock, if fail, wait
+            if(pthread_mutex_lock(s_mem->lock) == -1) {
+                pthread_cond_wait(s_mem->checkable, s_mem->lock);
+            }
             if(s_mem->t_turn % global->THREADS == tid) {
                 break;
             }
             pthread_mutex_unlock(s_mem->lock);
         }
+        // }
+        
         // get lock
         // pthread_mutex_lock(s_mem->lock);
         // printf("[%i] has the lock!\n", tid);
@@ -135,6 +150,7 @@ int move_to_mem(t_radix* thread_mem, record* lower, thread_args* ta) {
         // printf("[%i] unlocked the lock!\n", tid);
 
         s_mem->t_turn += 1;
+        pthread_cond_broadcast(s_mem->checkable);
         pthread_mutex_unlock(s_mem->lock);
         me->filled = count_idx;
     }

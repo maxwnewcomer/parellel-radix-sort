@@ -46,8 +46,8 @@
 #define D_ARR_SIZE 1000
 #define RECORD_SIZE 96
 #define KEY_BITS 32
-#define MAX_THREADS 3
-#define BITS_AT_ONCE 4
+#define MAX_THREADS 2
+#define BITS_AT_ONCE 8
 #define NUM_POS_VALUES (1 << BITS_AT_ONCE)
 #define key_t int32_t
 
