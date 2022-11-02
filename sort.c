@@ -82,7 +82,13 @@ int p_radix_sort(char* filename) {
         printf("failed to allocated lock");
         exit(EXIT_FAILURE);
     }
+    s_memory->checkable = malloc(sizeof(pthread_cond_t));
+    if(!s_memory->checkable) {
+        printf("failed to allocated lock");
+        exit(EXIT_FAILURE);
+    }
     pthread_mutex_init(s_memory->lock, NULL);
+    pthread_cond_init(s_memory->checkable, NULL);
     s_memory->c_t_arr = 0;
     s_memory->c_t_idx = 0;
     s_memory->t_turn = 0;
