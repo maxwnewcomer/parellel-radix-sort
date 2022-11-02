@@ -67,6 +67,7 @@ int p_radix_sort(char* filename) {
         printf("failed to alloc remaining count");
         exit(EXIT_FAILURE);
     }
+    // init atomics
     for(int i = 0; i <  NUM_POS_VALUES; i++) {
         atomic_init(&s_count->remaining[i], 0);
     }
@@ -84,6 +85,7 @@ int p_radix_sort(char* filename) {
     pthread_mutex_init(s_memory->lock, NULL);
     s_memory->c_t_arr = 0;
     s_memory->c_t_idx = 0;
+    s_memory->t_turn = 0;
     // alloc globals
     globals* global = malloc(sizeof(globals));
     if(!global) {
@@ -93,6 +95,7 @@ int p_radix_sort(char* filename) {
     global->ARR_SIZE = ARR_SIZE;
     global->THREADS = THREADS;
     global->total_records = filesize / 100;
+    global->empty_idxs = (ARR_SIZE*THREADS) - (filesize / 100);
     // alloc threads
     pthread_t *threads = malloc(sizeof(pthread_t)*THREADS);
     // create threads
@@ -118,11 +121,14 @@ int p_radix_sort(char* filename) {
     for(int i = 0; i < THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
+    // make sure things are in mem correctly!
 
-    for(int i = 0; i < filesize / sizeof(record); i++) {
-        printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
-    }
+    // for(int i = 0; i < filesize / sizeof(record); i++) {
+    //     printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
+    // }
+    // write back mmap
     msync(mapped_records, filesize, 0);
+    // free all of our stuff!
     munmap(mapped_records, filesize);
     free(s_count);
     free(s_memory);

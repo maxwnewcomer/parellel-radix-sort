@@ -4,9 +4,8 @@ typedef struct t_radix
 {
     int filled;
     int count_n[NUM_POS_VALUES];
-    int sorted;
     int inserted;
-    int my_tid;
+    int my_tid; // thread id
     pthread_cond_t finished;
     record* arr_start;
 } t_radix;
@@ -14,8 +13,9 @@ typedef struct t_radix
 typedef struct shared_memory
 {
     pthread_mutex_t* lock;
-    int c_t_arr;
-    int c_t_idx;
+    int t_turn;  // thread turn
+    int c_t_arr; // current thread arr
+    int c_t_idx; // current thread arr index
 } shared_memory;
 
 typedef struct shared_count
@@ -28,6 +28,7 @@ typedef struct globals
     int ARR_SIZE;
     int THREADS;
     int total_records;
+    int empty_idxs;
 } globals;
 
 typedef struct thread_args
