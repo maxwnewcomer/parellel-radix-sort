@@ -53,7 +53,7 @@ int p_radix_sort(char* filename) {
         pthread_cond_init(&thread_mem[i].finished, NULL);
         
     }
-    printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
+    // printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
 
     // alloc shared_count
     shared_count* s_count = malloc(sizeof(s_count));
@@ -87,8 +87,16 @@ int p_radix_sort(char* filename) {
         printf("failed to allocated lock");
         exit(EXIT_FAILURE);
     }
-    pthread_mutex_init(s_memory->lock, NULL);
-    pthread_cond_init(s_memory->checkable, NULL);
+    pthread_mutexattr_t mutexattr;
+    pthread_mutexattr_init(&mutexattr);
+    pthread_mutexattr_setpshared(&mutexattr, PTHREAD_PROCESS_SHARED);
+
+    pthread_condattr_t condattr;
+    pthread_condattr_init(&condattr);
+    pthread_condattr_setpshared(&condattr, PTHREAD_PROCESS_SHARED);
+
+    pthread_mutex_init(s_memory->lock, &mutexattr);
+    pthread_cond_init(s_memory->checkable, &condattr);
     s_memory->c_t_arr = 0;
     s_memory->c_t_idx = 0;
     s_memory->t_turn = 0;
@@ -129,9 +137,9 @@ int p_radix_sort(char* filename) {
     }
     // make sure things are in mem correctly!
 
-    // for(int i = 0; i < filesize / sizeof(record); i++) {
-    //     printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
-    // }
+    for(int i = 0; i < filesize / sizeof(record); i++) {
+        printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
+    }
     // write back mmap
     msync(mapped_records, filesize, 0);
     // free all of our stuff!

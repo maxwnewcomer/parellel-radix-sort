@@ -52,14 +52,17 @@ int main(int argc, char* argv[])
         printf("Writing %i records...\n", n);
         generate_test_file(n, filename);
     }
-   
-    // start timer
-    clock_t start = clock(), diff;
-    // sort
-    p_radix_sort(filename);
-    // get perf into
-    diff = clock() - start;
-    int msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf("Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
+    int attempts = 1;
+
+    float sum = 0.0;
+    for(int i = 0; i < attempts; i++) {
+        clock_t start = clock();
+        // sort
+        p_radix_sort(filename);
+
+        clock_t end = clock();
+        sum += (float)(end - start) / CLOCKS_PER_SEC;
+    }
+    printf("Avg time taken by CPU: %f ms\n", sum/attempts * 1000);
     return 0;
 }
