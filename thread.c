@@ -8,6 +8,10 @@
 #include "pthread.h"
 #include "stdatomic.h"
 
+uint32_t flip_sign(key_t key) {
+    return key ^ 0x80000000;
+}
+
 // ABC implementation from
 // https://brilliant.org/wiki/radix-sort/
 // 
@@ -37,7 +41,7 @@ int counting_sort(record* start, int size, record* lower, int iteration) {
     // count occurences of mask
     for(int i = 0; i<size; i++) {
         // eg. C[0xF & key] += 1
-        C[(unsigned)(start[i].key & mask) >> (iteration*BITS_AT_ONCE)] += 1;
+        C[(unsigned)(flip_sign(start[i].key) & mask) >> (iteration*BITS_AT_ONCE)] += 1;
         // IMPORTANT TO USE UNSIGNED
     }
 
@@ -48,8 +52,8 @@ int counting_sort(record* start, int size, record* lower, int iteration) {
     }
     // final sort
     for(int k = size-1; k>=0; k--) {
-        C[(unsigned)(start[k].key & mask) >> (iteration*BITS_AT_ONCE)] -= 1;
-        lower[C[(unsigned)(start[k].key & mask) >> (iteration*BITS_AT_ONCE)]] = start[k];
+        C[(unsigned)(flip_sign(start[k].key) & mask) >> (iteration*BITS_AT_ONCE)] -= 1;
+        lower[C[(unsigned)(flip_sign(start[k].key) & mask) >> (iteration*BITS_AT_ONCE)]] = start[k];
     }
 
     // for(int i = 0; i < NUM_POS_VALUES; i++) {
@@ -57,6 +61,7 @@ int counting_sort(record* start, int size, record* lower, int iteration) {
     // }
     return 0;
 }
+
 
 // int move_to_mem(t_radix* thread_mem, record* lower, thread_args* ta) {
 //     t_radix* me = &thread_mem[ta->my_tid];
@@ -148,7 +153,7 @@ int get_msb_like_me(record* lower, record* readin, record** extras, unsigned int
     for(int i = 0; i < total_records; i++) {
         // printf("%i, %X, %p\n", i, KEY_MASK, readin);
 
-        if(((KEY_MASK & readin[i].key) >> 28) == tid) {
+        if(((KEY_MASK & flip_sign(readin[i].key)) >> 28) == tid) {
             // printf("%08x, %08X, %08X, %X\n", readin[i].key, readin[i].key & KEY_MASK, (readin[i].key & KEY_MASK) >> 28, tid);
             if(lower_count >= num_in_lower) {
                 // set up new array in extras if needed

@@ -150,9 +150,9 @@ int p_radix_sort(char* in, char* out) {
     //     exit(EXIT_FAILURE);
     // }
     
-    // for(int i = 0; i < global->total_records; i++) {
-    //     printf("m:\t%08x\n", mapped_out[i].key);
-    // }
+    for(int i = 0; i < global->total_records; i++) {
+        printf("m:\t%i\n", mapped_out[i].key);
+    }
     msync(mapped_out, filesize, MS_SYNC);
     munmap(mapped_out, filesize);   
     // free all of our stuff!
