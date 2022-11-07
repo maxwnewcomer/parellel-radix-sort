@@ -8,6 +8,7 @@
 #include "pthread.h"
 #include "stdatomic.h"
 
+// two's complement to unsigned
 uint32_t flip_sign(key_t key) {
     return key ^ 0x80000000;
 }

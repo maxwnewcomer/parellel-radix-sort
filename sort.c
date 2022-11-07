@@ -64,7 +64,7 @@ int p_radix_sort(char* in, char* out) {
         pthread_cond_init(&thread_mem[i].finished, NULL);
         
     }
-    printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
+    // printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
 
     // alloc shared_count
     shared_count* s_count = malloc(sizeof(s_count));
@@ -150,9 +150,9 @@ int p_radix_sort(char* in, char* out) {
     //     exit(EXIT_FAILURE);
     // }
     
-    for(int i = 0; i < global->total_records; i++) {
-        printf("m:\t%i\n", mapped_out[i].key);
-    }
+    // for(int i = 0; i < global->total_records; i++) {
+    //     printf("m:\t%i\n", mapped_out[i].key);
+    // }
     msync(mapped_out, filesize, MS_SYNC);
     munmap(mapped_out, filesize);   
     // free all of our stuff!
