@@ -1,5 +1,12 @@
 #include "stdatomic.h"
 
+
+#define EXTRA_SIZE 100
+#define NUM_EXTRAS_POS 100
+#define MIN_LOWER 10
+#define KEY_MASK 0xF0000000
+
+
 typedef struct t_radix
 {
     int filled;
@@ -8,6 +15,7 @@ typedef struct t_radix
     int my_tid; // thread id
     pthread_cond_t finished;
     record* arr_start;
+    record* out;
 } t_radix;
 
 typedef struct shared_memory
@@ -15,8 +23,7 @@ typedef struct shared_memory
     pthread_mutex_t* lock;
     pthread_cond_t* checkable;
     int t_turn;  // thread turn
-    int c_t_arr; // current thread arr
-    int c_t_idx; // current thread arr index
+    int curr_idx;
 } shared_memory;
 
 typedef struct shared_count
@@ -27,14 +34,13 @@ typedef struct shared_count
 typedef struct globals
 {
     int ARR_SIZE;
-    int THREADS;
     int total_records;
     int empty_idxs;
 } globals;
 
 typedef struct thread_args
 {
-    int my_tid;
+    unsigned int my_tid;
     shared_count* s_count;
     shared_memory* s_memory;
     globals* global;

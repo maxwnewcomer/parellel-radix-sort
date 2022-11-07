@@ -3,7 +3,7 @@ CCFLAGS=-Wall -pthread -O2 -g
 LDFLAGS=
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
-TARGET=test
+TARGET=psort
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)

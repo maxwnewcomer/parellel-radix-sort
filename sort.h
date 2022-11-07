@@ -46,8 +46,8 @@
 #define D_ARR_SIZE 1000
 #define RECORD_SIZE 96
 #define KEY_BITS 32
-#define MAX_THREADS 2
-#define BITS_AT_ONCE 8
+#define THREADS 16
+#define BITS_AT_ONCE 4
 #define NUM_POS_VALUES (1 << BITS_AT_ONCE)
 #define key_t int32_t
 
@@ -59,4 +59,4 @@ typedef struct record
 } record;
 
 
-int p_radix_sort(char* filename);
+int p_radix_sort(char* in, char* out);
