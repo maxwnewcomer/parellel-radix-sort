@@ -63,85 +63,6 @@ int counting_sort(record* start, int size, record* lower, int iteration) {
     return 0;
 }
 
-
-// int move_to_mem(t_radix* thread_mem, record* lower, thread_args* ta) {
-//     t_radix* me = &thread_mem[ta->my_tid];
-//     shared_memory* s_mem = ta->s_memory;
-//     shared_count* s_count = ta->s_count;
-//     globals* global = ta->global;
-//     int tid = ta->my_tid;
-//     int count_idx = 0;
-//     int lower_idx = 0;
-    
-
-    
-//     // reset idxes each round
-//     if(tid == 0) {
-//         while(1) {
-//             if(pthread_mutex_lock(s_mem->lock) == -1) {
-//                 pthread_cond_wait(s_mem->checkable, s_mem->lock);
-//             }
-//             if(s_mem->t_turn % THREADS == tid) {
-//                 s_mem->c_t_arr = 0;
-//                 s_mem->c_t_idx = 0;
-//                 break;
-//             }
-//             pthread_mutex_unlock(s_mem->lock);
-//         }
-//         pthread_mutex_unlock(s_mem->lock);
-//     }
-
-//     while(count_idx < NUM_POS_VALUES) {
-//         // wait for turn
-//         while(1) {
-//             // try to lock, if fail, wait
-//             if(pthread_mutex_lock(s_mem->lock) == -1) {
-//                 pthread_cond_wait(s_mem->checkable, s_mem->lock);
-//             }
-//             if(s_mem->t_turn % THREADS == tid) {
-//                 break;
-//             }
-//             pthread_mutex_unlock(s_mem->lock);
-//         }
-
-//         // insert here!
-//         int inserting = me->count_n[count_idx];
-//         while(me->count_n[count_idx] != 0) {
-//             // check for zeros (might not work in tests ) TODO
-//             if(tid == THREADS - 1 && lower[lower_idx].key == 0) {
-//                 ;;
-//             } else {
-//                 // add into curr ptr!
-//                 thread_mem[s_mem->c_t_arr].arr_put[s_mem->c_t_idx] = lower[lower_idx];
-//             }
-//             for(int i = count_idx; i < NUM_POS_VALUES; i++) {
-//                 me->count_n[i] -= 1;
-//             }
-            
-//             lower_idx += 1;
-//             // calc new idx
-//             if(s_mem->c_t_idx == global->ARR_SIZE - 1) {
-//                 s_mem->c_t_idx = 0;
-//                 s_mem->c_t_arr += 1;
-//             } else {
-//                 s_mem->c_t_idx += 1;
-//             }
-//         }
-
-//         for(int i = count_idx; i < NUM_POS_VALUES; i++) {
-//             atomic_fetch_sub(&s_count->remaining[i], inserting);
-//         }
-//         count_idx += 1;
-//         // printf("[%i] unlocked the lock!\n", tid);
-
-//         s_mem->t_turn += 1;
-//         pthread_cond_broadcast(s_mem->checkable);
-//         pthread_mutex_unlock(s_mem->lock);
-//         me->filled = count_idx;
-//     }
-//     return 0;
-// }
-
 // returns count added, if fail -1
 int get_msb_like_me(record* lower, record* readin, record** extras, unsigned int tid, int total_records, int num_in_lower, int* extras_made) {
     int total_count = 0;
@@ -284,8 +205,6 @@ void* t_run(void* in_ta) {
     free(extras);
     free(lower);
 
-
-
     // create new lower of proper size
     record* fit_lower = (record*) malloc(total_in_me * sizeof(record));
     if(!lower) {
@@ -304,6 +223,5 @@ void* t_run(void* in_ta) {
     }
 
     free(fit_lower);
-    return 0;
-
+    pthread_exit(0);
 }

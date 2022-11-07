@@ -15,7 +15,9 @@
 
 int get_file_size(char* filename) {
     struct stat st;
-    stat(filename, &st);
+    if(stat(filename, &st) == -1) {
+        return -1;
+    }
     off_t size = st.st_size;
     return size;
 }
@@ -23,6 +25,10 @@ int get_file_size(char* filename) {
 int p_radix_sort(char* in, char* out) {
     size_t pagesize = getpagesize();
     int filesize = get_file_size(in);
+    if(filesize <= 0) {
+        fprintf(stderr, "An error has occurred\n");
+        exit(0);
+    }
     // get quick approximates
     float div_result = filesize / 100.0 / (float)THREADS;
     int ARR_SIZE = (int)div_result;
@@ -56,32 +62,11 @@ int p_radix_sort(char* in, char* out) {
     }
     // init structs
     for(int i = 0; i < THREADS; i++) {
-        thread_mem[i].filled = 0;
         thread_mem[i].my_tid = i;
         thread_mem[i].arr_start = mapped_records;
-        thread_mem[i].out = mapped_out;
-        
-        pthread_cond_init(&thread_mem[i].finished, NULL);
-        
+        thread_mem[i].out = mapped_out;      
     }
     // printf("INIT Diagnostic:\n\tfilesize:   %i\n\tthreads:    %i\n\tARR_SIZE:   %i\n\tmem/thread: %li\n\n", filesize, THREADS, ARR_SIZE, sizeof(t_radix));
-
-    // alloc shared_count
-    shared_count* s_count = malloc(sizeof(s_count));
-    if(!s_count) {
-        printf("failed to alloc big_count");
-        exit(EXIT_FAILURE);
-    }
-
-    s_count->remaining = (atomic_int *) malloc(NUM_POS_VALUES * sizeof(atomic_int));
-    if(!s_count->remaining) {
-        printf("failed to alloc remaining count");
-        exit(EXIT_FAILURE);
-    }
-    // init atomics
-    for(int i = 0; i <  NUM_POS_VALUES; i++) {
-        atomic_init(&s_count->remaining[i], 0);
-    }
     // alloc shared_memory
     shared_memory* s_memory = malloc(sizeof(shared_memory));
     if(!s_memory) {
@@ -109,9 +94,7 @@ int p_radix_sort(char* in, char* out) {
         printf("failed to alloc globals");
         exit(EXIT_FAILURE);
     }
-    global->ARR_SIZE = ARR_SIZE;
     global->total_records = filesize / 100;
-    global->empty_idxs = (ARR_SIZE*THREADS) - (filesize / 100);
     // alloc threads
     pthread_t *threads = malloc(sizeof(pthread_t)*THREADS);
     // create threads
@@ -124,7 +107,6 @@ int p_radix_sort(char* in, char* out) {
             exit(EXIT_FAILURE);
         }
         ta->thread_mem = thread_mem;
-        ta->s_count = s_count;
         ta->s_memory = s_memory;
         ta->global = global;
         ta->my_tid = i;
@@ -140,28 +122,17 @@ int p_radix_sort(char* in, char* out) {
     }
     // make sure things are in mem correctly!
 
-    // for(int i = 0; i < filesize / sizeof(record); i++) {
-    //     printf("m\t%p\t%8x\n", &mapped_records[i], mapped_records[i].key);
-    // }
-    // write back mmap
-    
-    // if(ftruncate(outfile, filesize)) {
-    //     printf("failed to truncate");
-    //     exit(EXIT_FAILURE);
-    // }
-    
     // for(int i = 0; i < global->total_records; i++) {
     //     printf("m:\t%i\n", mapped_out[i].key);
     // }
-    msync(mapped_out, filesize, MS_SYNC);
+    msync(mapped_out, filesize, MS_ASYNC);
+       // free all of our stuff!
     munmap(mapped_out, filesize);   
-    // free all of our stuff!
     munmap(mapped_records, filesize);
-    // free(s_count);
-    // free(s_memory);
-    // free(global);
-    // free(thread_mem);
-    // free(threads);'
+    free(s_memory);
+    free(global);
+    free(thread_mem);
+    free(threads);
     close(f);
     close(outfile);
     return 1;
