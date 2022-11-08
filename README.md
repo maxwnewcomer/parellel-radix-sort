@@ -1,5 +1,5 @@
 # Parellel Radix Sort
-### Max Newcomer and Audrey Howaniec
+by Max Newcomer and Audrey Howaniec
 
 
 ## Preamble
