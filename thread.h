@@ -1,8 +1,7 @@
-#include "stdatomic.h"
 #include "pthread.h"
 
 
-#define EXTRA_SIZE 1000
+#define EXTRA_SIZE 10000
 #define NUM_EXTRAS_POS 100
 #define MIN_LOWER 10
 #define KEY_MASK 0xF0000000

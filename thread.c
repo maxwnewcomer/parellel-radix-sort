@@ -6,7 +6,6 @@
 #include "sys/mman.h"
 #include "unistd.h"
 #include "pthread.h"
-#include "stdatomic.h"
 
 // two's complement to unsigned
 uint32_t flip_sign(key_t key) {

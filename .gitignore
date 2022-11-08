@@ -53,3 +53,7 @@ dkms.conf
 
 # program specific
 test
+*.sh 
+psort
+*.bin
+.vscode/*

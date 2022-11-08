@@ -9,8 +9,6 @@
 #include "unistd.h"
 #include "pthread.h"
 #include "thread.h"
-#include "math.h"
-#include "stdatomic.h"
 
 
 int get_file_size(char* filename) {
