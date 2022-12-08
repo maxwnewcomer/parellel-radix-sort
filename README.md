@@ -14,7 +14,7 @@ We went from that approach to our current implementation when reading the tests 
 ##  Current Implementation
 
 1. Spawn 16 threads with id's 0 through F.
-2. Each thread reads (in-parellel) the input file and grabs all records with the Most Sig Bits of the key matching the thread id
+2. Each thread reads (in-parellel) the input file and grabs all records with the Most Sig Bits of the key matching the thread id (since each key is a IID variable, we can expect with large inputs to have even distribution of keys, this is something we would need to consider changing if we were expecting a different distribution of keys)
 3. Threads keep track of how many they added into their personal memory
 4. Thread 0 finds its starting point in the output mmap
     - Then thread 1, thread 2, ... , thread F
