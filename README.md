@@ -8,7 +8,7 @@ Team solution to project: https://github.com/remzi-arpacidusseau/ostep-projects/
 
 When we first started this project, we actually thought that the sort was supposed to be within the same file. So we actually started with this pretty cool (but not super fast) thread latching radix sort. The problem with that sort was that there were many iterations of syncronizing the threads.
 
-We went form that approach to our current implementation when reading the tests (and the project description lol) again. With the requirement of another output file we thought up our new implementation.
+We went from that approach to our current implementation when reading the tests (and the project description lol) again. With the requirement of another output file we thought up our new implementation.
 
 
 ##  Current Implementation
