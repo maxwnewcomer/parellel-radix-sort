@@ -1,5 +1,5 @@
 # Parellel Radix Sort
-by Max Newcomer and Audrey Howaniec
+by Max Newcomer
 
 Team solution to project: https://github.com/remzi-arpacidusseau/ostep-projects/tree/master/concurrency-sort
 
