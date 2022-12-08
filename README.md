@@ -30,6 +30,8 @@ Pretty proud of this sort and think it's actually pretty cool.
 
 If we had a little more time and/or we were getting paid to actually deliver this we would like to make the number of threads a little more dynamic, allowing for numerous processor core cpus to take advantage of each core. This would look something like spawning n threads and then bit masking the first log_2(n) bits of each record to delegate work to each thread. 
 
+Step 4. could actually be further optimized (maybe only slightly). By having each thread have a public count each thread n could add up all n-1 threads before and use that as an offset. This would require constant checking by each thread that they have up to date information which honestly might slow down the program. Only way to know would be to implement. Given that the current implementation uses condition signalling it might be hard to further optimize this part. 
+
 
 ## Extras
 
